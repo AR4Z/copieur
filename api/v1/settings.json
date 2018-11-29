@@ -1,0 +1,13 @@
+{
+  "development": {
+    "PATH_LOS": "/home/ar4z/Projects/web/froacAA/LOs/", 
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": 6379,
+    "REDIS_DB": 0,
+    "CELERY_BROKER": "redis://localhost:6379/0",
+    "CELERY_BACKEND": "redis://localhost:6379/0"
+  },
+  "production": {
+    "PATH_LOS": "/var/www/html/froacAA/LOs/"
+  }
+}
