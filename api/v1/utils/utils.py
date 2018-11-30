@@ -143,8 +143,8 @@ def change_css(css_styles):
     return css_styles
 
 
-def unwrap_p(DOM):
-    soup = BeautifulSoup(DOM, 'html.parser')
+def unwrap_p(dom):
+    soup = BeautifulSoup(dom, 'html.parser')
 
     for p_tag in soup.findAll('p'):
         for span_tag in p_tag.findAll('span'):
