@@ -10,6 +10,7 @@ redis_service = RedisService()
 
 class LearningObjectResource:
     def on_post(self, req, resp):
+        print("HAHA")
         req = req_to_dict(req)
         data = {
             'name': req.get('name').replace(' ', ''),

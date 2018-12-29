@@ -6,7 +6,7 @@ import falcon
 from celery_singleton import Singleton
 from dynaconf import settings
 from .utils import extract_html, extract_name_directory_lo, get_all_files, process_css, process_html
-from utils.redis_service import RedisService
+from .redis_service import RedisService
 
 app = celery.Celery('cloner',
                     broker=settings.get('CELERY_BROKER'),
