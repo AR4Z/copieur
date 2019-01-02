@@ -1,16 +1,13 @@
 import json
 import falcon
 from celery.result import AsyncResult
-from utils.cloner import clone_lo
-from utils.utils import req_to_dict
-from utils.redis_service import RedisService
+from utils import clone_lo, req_to_dict, RedisService
 
-redis_service = RedisService()
+service = RedisService()
 
 
 class LearningObjectResource:
     def on_post(self, req, resp):
-        print("HAHA")
         req = req_to_dict(req)
         data = {
             'name': req.get('name').replace(' ', ''),
@@ -19,10 +16,10 @@ class LearningObjectResource:
 
         redis_key_lo = '{0}:{1}'.format(data.get('name'), data.get('url'))
 
-        if redis_service.exists(redis_key_lo):
+        if service.exists(redis_key_lo):
             resp.status = falcon.HTTP_200
             resp.body = json.dumps({
-                'path_lo': redis_service.get(redis_key_lo)
+                'path_lo': service.get(redis_key_lo)
             })
         else:
             task_clone_lo = clone_lo.delay(data)

@@ -1,18 +1,18 @@
 import os
 import shutil
 import subprocess
-import celery
-import falcon
+from celery import Celery
+from falcon import status_codes as status
 from celery_singleton import Singleton
 from dynaconf import settings
 from .utils import extract_html, extract_name_directory_lo, get_all_files, process_css, process_html
 from .redis_service import RedisService
 
-app = celery.Celery('cloner',
+app = Celery('cloner',
                     broker=settings.get('CELERY_BROKER'),
                     backend=settings.get('CELERY_BACKEND'))
 
-redis_service = RedisService()
+service = RedisService()
 
 
 @app.task(base=Singleton)
@@ -34,7 +34,7 @@ def clone_lo(data):
                                         extract_name_directory_lo(html_httrack))
     except FileNotFoundError:
         shutil.rmtree(path_lo, ignore_errors=True)
-        return falcon.HTTP_404
+        return status.HTTP_404
 
     path_folder_lo = '{0}{1}'.format(settings.get(
         'PATH_LOS'), os.path.split(main_file_lo)[0])
@@ -48,6 +48,6 @@ def clone_lo(data):
     for html_file in html_files:
         process_html('{0}/{1}'.format(path_folder_lo, html_file))
 
-    redis_service.set('{0}:{1}'.format(name_lo, url_lo), main_file_lo)
+    service.set('{0}:{1}'.format(name_lo, url_lo), main_file_lo)
 
     return main_file_lo

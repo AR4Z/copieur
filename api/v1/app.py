@@ -1,8 +1,8 @@
 import falcon
 from falcon_cors import CORS
-from resources.los import LearningObjectResource
+from resources import LearningObjectResource
 
-api = falcon.API(middleware=[
+api: falcon.API = falcon.API(middleware=[
     CORS(
         allow_all_origins=True,
         allow_all_methods=True,
