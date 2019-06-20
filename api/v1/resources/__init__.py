@@ -1,1 +1,1 @@
-from .los import *
+from .lo import LearningObjectResource

@@ -6,8 +6,8 @@ from utils import clone_lo, req_to_dict, RedisService
 service = RedisService()
 
 
-class LearningObjectResource:
-    def on_post(self, req, resp):
+class LearningObjectResource(object):
+    def on_post(self, req, resp, clone_lo_id):
         req = req_to_dict(req)
         data = {
             'name': req.get('name').replace(' ', ''),
