@@ -7,7 +7,7 @@ service = RedisService()
 
 
 class LearningObjectResource(object):
-    def on_post(self, req, resp, clone_lo_id):
+    def on_post(self, req, resp):
         req = req_to_dict(req)
         data = {
             'name': req.get('name').replace(' ', ''),
@@ -28,6 +28,7 @@ class LearningObjectResource(object):
                 'id_task_clone_lo': task_clone_lo.id
             })
 
+class LearningObjectResourceItem(object):
     def on_get(self, req, resp, clone_lo_id):
         clone_result = AsyncResult(clone_lo_id)
         result = {

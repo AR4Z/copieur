@@ -1,1 +1,1 @@
-from .lo import LearningObjectResource
+from .lo import LearningObjectResource, LearningObjectResourceItem

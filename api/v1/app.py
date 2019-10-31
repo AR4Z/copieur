@@ -1,6 +1,6 @@
 import falcon
 from falcon_cors import CORS
-from resources import LearningObjectResource
+from resources import LearningObjectResource, LearningObjectResourceItem
 
 api = falcon.API(middleware=[
     CORS(
@@ -10,4 +10,5 @@ api = falcon.API(middleware=[
     ).middleware
 ])
 
-api.add_route('/v1/lo/{clone_lo_id}', LearningObjectResource())
+api.add_route('/v1/lo/{clone_lo_id}', LearningObjectResourceItem())
+api.add_route('/v1/lo', LearningObjectResource())
