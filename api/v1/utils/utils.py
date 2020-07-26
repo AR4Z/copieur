@@ -4,6 +4,7 @@ import os
 import re
 import glob
 import cssutils
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -163,6 +164,8 @@ def unwrap_p(dom):
 
 def process_html(path_html_file):
     html = unwrap_p(change_html(extract_html(path_html_file)))
+    path = os.path.split(os.path.abspath(path_html_file))[0]
+    html = add_video_cc(html, path)
     with open(path_html_file, 'w') as html_file:
         html_file.write(html)
 
@@ -176,3 +179,32 @@ def process_css(path_css_file):
 def extract_css_rules(path_css_file):
     sheet = cssutils.parseFile(path_css_file)
     return sheet
+
+
+def download_video(url, path):
+    local_filename = url.split('/')[-1]
+    r = requests.get(url, stream=True)
+    video_path = f'{path}/{local_filename}'
+    with open(video_path, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+                f.flush()
+
+    return video_path
+
+
+def add_video_cc(dom, path):
+    soup = BeautifulSoup(dom, 'html.parser')
+    print(path)
+    for video_tag in soup.findAll('video'):
+        sources = video_tag.findAll('source')
+        if sources:
+            source = sources[0]
+            url_video = source.get('src')
+            video_path = download_video(url_video, path)
+            source['src'] = video_path
+        else:
+            continue
+        print(video_tag)
+    return str(soup)

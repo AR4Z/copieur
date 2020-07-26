@@ -1,6 +1,6 @@
 {
   "development": {
-    "PATH_LOS": "/home/ar4z/Projects/web/froacAA/LOs/",
+    "PATH_LOS": "/home/ar4z/public_html/los/",
     "CELERY_BROKER": "redis://localhost:6379/0",
     "CELERY_BACKEND": "redis://localhost:6379/0"
   },
