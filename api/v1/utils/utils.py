@@ -6,6 +6,10 @@ import glob
 import cssutils
 import requests
 from bs4 import BeautifulSoup
+import speech_recognition as sr
+from pydub import AudioSegment
+from aeneas.executetask import ExecuteTask
+from aeneas.task import Task
 
 
 def req_to_dict(req):
@@ -196,14 +200,55 @@ def download_video(url, path):
 
 def add_video_cc(dom, path):
     soup = BeautifulSoup(dom, 'html.parser')
+    config_string = 'task_language=spa|is_text_type=plain|os_task_file_format=vtt'
+    task = Task(config_string=config_string)
     print(path)
+
     for video_tag in soup.findAll('video'):
         sources = video_tag.findAll('source')
+
         if sources:
             source = sources[0]
             url_video = source.get('src')
             video_path = download_video(url_video, path)
             source['src'] = video_path
+            video_name = url_video.split('/')[-1][:-4]
+
+            sound = AudioSegment.from_file(f'{video_path}')
+            sound.export('audio.wav', format='wav')
+            r = sr.Recognizer()
+
+            with sr.AudioFile('audio.wav') as source:
+                audio = r.record(source)
+                text = r.recognize_google(audio, language='es-ES')
+
+            words = text.split()
+            text_by_lines = ''
+            cont = 0
+            line = ''
+
+            for word in words:
+                line += f'{word} '
+                cont += 1
+
+                if cont == 6:
+                    text_by_lines += f'{line}\n'
+                    cont = 0
+                    line = ''
+
+            with open('text.txt', 'w', encoding='utf-8') as text_file:
+                text_file.write(text_by_lines)
+
+            task.audio_file_path_absolute = f'{path}/audio.wav'
+            task.text_file_path_absolute = f'{path}/text.txt'
+            task.sync_map_file_path_absolute = f'{path}/{video_name}.vtt'
+            track_tag = soup.new_tag('track', label='Espanol', kind='subtitles',
+                                     srclang='es', src=f'{task.sync_map_file_path_absolute}')
+            video_tag.append(track_tag)
+
+            ExecuteTask(task).execute()
+            # output sync map to file
+            task.output_sync_map_file()
         else:
             continue
         print(video_tag)
