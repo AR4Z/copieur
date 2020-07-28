@@ -211,7 +211,6 @@ def add_video_cc(dom, path):
             source = sources[0]
             url_video = source.get('src')
             video_path = download_video(url_video, path)
-            source['src'] = video_path
             video_name = url_video.split('/')[-1][:-4]
 
             sound = AudioSegment.from_file(f'{video_path}')
@@ -236,6 +235,9 @@ def add_video_cc(dom, path):
                     cont = 0
                     line = ''
 
+            if cont != 0:
+                text_by_lines += f'{line}\n'
+
             with open('text.txt', 'w', encoding='utf-8') as text_file:
                 text_file.write(text_by_lines)
 
@@ -243,7 +245,7 @@ def add_video_cc(dom, path):
             task.text_file_path_absolute = f'{path}/text.txt'
             task.sync_map_file_path_absolute = f'{path}/{video_name}.vtt'
             track_tag = soup.new_tag('track', label='Espanol', kind='subtitles',
-                                     srclang='es', src=f'{task.sync_map_file_path_absolute}')
+                                     srclang='es', src=f'http://localhost/~ar4z/los/ecosistema/froac.manizales.unal.edu.co/roapRAIM/control/196.vtt')
             video_tag.append(track_tag)
 
             ExecuteTask(task).execute()
