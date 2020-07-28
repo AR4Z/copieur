@@ -1,11 +1,13 @@
 {
   "development": {
     "PATH_LOS": "/home/ar4z/public_html/los/",
+    "SERVER_URL": "http://localhost/~ar4z/",
     "CELERY_BROKER": "redis://localhost:6379/0",
     "CELERY_BACKEND": "redis://localhost:6379/0"
   },
   "production": {
-    "PATH_LOS": "/var/www/html/froacAA/LOs/",
+    "PATH_LOS": "/var/www/html/froacAA/los/",
+    "SERVER_URL": "http://gaia.manizales.unal.edu.co/froacAA/",
     "CELERY_BROKER": "redis://localhost:6379/0",
     "CELERY_BACKEND": "redis://localhost:6379/0"
   }

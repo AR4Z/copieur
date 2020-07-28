@@ -10,6 +10,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from aeneas.executetask import ExecuteTask
 from aeneas.task import Task
+from dynaconf import settings
 
 
 def req_to_dict(req):
@@ -167,6 +168,7 @@ def unwrap_p(dom):
 
 
 def process_html(path_html_file):
+    print('PATH', path_html_file)
     html = unwrap_p(change_html(extract_html(path_html_file)))
     path = os.path.split(os.path.abspath(path_html_file))[0]
     html = add_video_cc(html, path)
@@ -199,6 +201,7 @@ def download_video(url, path):
 
 
 def add_video_cc(dom, path):
+    SERVER_URL = settings.get('SERVER_URL')
     soup = BeautifulSoup(dom, 'html.parser')
     config_string = 'task_language=spa|is_text_type=plain|os_task_file_format=vtt'
     task = Task(config_string=config_string)
@@ -212,6 +215,7 @@ def add_video_cc(dom, path):
             url_video = source.get('src')
             video_path = download_video(url_video, path)
             video_name = url_video.split('/')[-1][:-4]
+            source['src'] = f'{SERVER_URL}{path[path.index("los"):]}/{url_video.split("/")[-1]}'
 
             sound = AudioSegment.from_file(f'{video_path}')
             sound.export('audio.wav', format='wav')
@@ -245,7 +249,7 @@ def add_video_cc(dom, path):
             task.text_file_path_absolute = f'{path}/text.txt'
             task.sync_map_file_path_absolute = f'{path}/{video_name}.vtt'
             track_tag = soup.new_tag('track', label='Espanol', kind='subtitles',
-                                     srclang='es', src=f'http://localhost/~ar4z/los/ecosistema/froac.manizales.unal.edu.co/roapRAIM/control/196.vtt')
+                                     srclang='es', src=f'{SERVER_URL}{path[path.index("los"):]}/{video_name}.vtt')
             video_tag.append(track_tag)
 
             ExecuteTask(task).execute()
