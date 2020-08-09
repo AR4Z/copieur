@@ -166,12 +166,29 @@ def unwrap_p(dom):
 
     return str(soup)
 
+def hide_elements_without_description(html):
+    soup = BeautifulSoup(html, 'html.parser')
+
+    for img_tag in soup.findAll('img'):
+        if not img_tag.get('alt') or img_tag.get('alt').strip() == '':
+            img_tag['style'] = 'display:none;'
+    
+    for video_tag in soup.findAll('video'):
+        if not video_tag.get('alt') or video_tag.get('alt').strip() == '':
+            video_tag['style'] = 'display:none;'
+    
+    for audio_tag in soup.findAll('audio'):
+        if not audio_tag.get('alt') or audio_tag.get('alt').strip() == '':
+            audio_tag['style'] = 'display:none;'
+    
+    return str(soup)
 
 def process_html(path_html_file):
     print('PATH', path_html_file)
     html = unwrap_p(change_html(extract_html(path_html_file)))
     path = os.path.split(os.path.abspath(path_html_file))[0]
     html = add_video_cc(html, path)
+    html = hide_elements_without_description(html)
     with open(path_html_file, 'w') as html_file:
         html_file.write(html)
 
