@@ -1,7 +1,7 @@
 import json
 import falcon
 from celery.result import AsyncResult
-from utils import clone_lo, req_to_dict, RedisService
+from utils import clone_lo, req_to_dict, RedisService, hide_links_with_404
 
 service = RedisService()
 
@@ -17,6 +17,7 @@ class LearningObjectResource(object):
         redis_key_lo = '{0}:{1}'.format(data.get('name'), data.get('url'))
 
         if service.exists(redis_key_lo):
+            hide_links_with_404(service.get(redis_key_lo))
             resp.status = falcon.HTTP_200
             resp.body = json.dumps({
                 'path_lo': service.get(redis_key_lo)
@@ -27,6 +28,7 @@ class LearningObjectResource(object):
             resp.body = json.dumps({
                 'id_task_clone_lo': task_clone_lo.id
             })
+
 
 class LearningObjectResourceItem(object):
     def on_get(self, req, resp, clone_lo_id):
@@ -39,6 +41,7 @@ class LearningObjectResourceItem(object):
         if(clone_result.result == falcon.HTTP_404):
             resp.status = falcon.HTTP_404
         else:
+            hide_links_with_404(clone_result.result)
             resp.status = falcon.HTTP_200
 
         resp.body = json.dumps(result)

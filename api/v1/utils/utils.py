@@ -11,6 +11,8 @@ from pydub import AudioSegment
 from aeneas.executetask import ExecuteTask
 from aeneas.task import Task
 from dynaconf import settings
+import urllib
+from dynaconf import settings
 
 
 def req_to_dict(req):
@@ -298,7 +300,6 @@ def add_audio_cc(dom, path):
 
             r = sr.Recognizer()
 
-
             with sr.AudioFile('audio.wav') as source:
                 audio = r.record(source)
                 try:
@@ -318,3 +319,28 @@ def add_audio_cc(dom, path):
             continue
 
     return str(soup)
+
+
+def hide_links_with_404(main_file_lo):
+    path_folder_lo = '{0}{1}'.format(settings.get(
+        'PATH_LOS'), os.path.split(main_file_lo)[0])
+    html_files = get_all_files(path_folder_lo, '*.html')
+
+    for html_file in html_files:
+        soup = BeautifulSoup(extract_html(html_file), 'html.parser')
+
+        for a_tag in soup.find_all('a'):
+            href = a_tag.get('href')
+
+            if href:
+                try:
+                    urllib.request.urlopen(href)
+                    a_tag['style'] = 'display:block;'
+                except ValueError:
+                    pass
+                except (urllib.error.HTTPError, urllib.error.URLError) as e:
+                    a_tag['style'] = 'display:none;'
+
+        html = str(soup)
+        with open(html_file, 'w') as html_file:
+            html_file.write(html)
