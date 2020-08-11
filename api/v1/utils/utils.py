@@ -166,28 +166,31 @@ def unwrap_p(dom):
 
     return str(soup)
 
+
 def hide_elements_without_description(html):
     soup = BeautifulSoup(html, 'html.parser')
 
     for img_tag in soup.findAll('img'):
         if not img_tag.get('alt') or img_tag.get('alt').strip() == '':
             img_tag['style'] = 'display:none;'
-    
+
     for video_tag in soup.findAll('video'):
         if not video_tag.get('alt') or video_tag.get('alt').strip() == '':
             video_tag['style'] = 'display:none;'
-    
+
     for audio_tag in soup.findAll('audio'):
         if not audio_tag.get('alt') or audio_tag.get('alt').strip() == '':
             audio_tag['style'] = 'display:none;'
-    
+
     return str(soup)
+
 
 def process_html(path_html_file):
     print('PATH', path_html_file)
     html = unwrap_p(change_html(extract_html(path_html_file)))
     path = os.path.split(os.path.abspath(path_html_file))[0]
     html = add_video_cc(html, path)
+    html = add_audio_cc(html, path)
     html = hide_elements_without_description(html)
     with open(path_html_file, 'w') as html_file:
         html_file.write(html)
@@ -232,7 +235,7 @@ def add_video_cc(dom, path):
             url_video = source.get('src')
             video_path = download_video(url_video, path)
             video_name = url_video.split('/')[-1][:-4]
-            source['src'] = f'{SERVER_URL}{path[path.index("los"):]}/{url_video.split("/")[-1]}'
+            source['src'] = f'{SERVER_URL}{path[path.index("LOs"):]}/{url_video.split("/")[-1]}'
 
             sound = AudioSegment.from_file(f'{video_path}')
             sound.export('audio.wav', format='wav')
@@ -266,7 +269,7 @@ def add_video_cc(dom, path):
             task.text_file_path_absolute = f'{path}/text.txt'
             task.sync_map_file_path_absolute = f'{path}/{video_name}.vtt'
             track_tag = soup.new_tag('track', label='Espanol', kind='subtitles',
-                                     srclang='es', src=f'{SERVER_URL}{path[path.index("los"):]}/{video_name}.vtt')
+                                     srclang='es', src=f'{SERVER_URL}{path[path.index("LOs"):]}/{video_name}.vtt')
             video_tag.append(track_tag)
 
             ExecuteTask(task).execute()
@@ -275,4 +278,43 @@ def add_video_cc(dom, path):
         else:
             continue
         print(video_tag)
+    return str(soup)
+
+
+def add_audio_cc(dom, path):
+    SERVER_URL = settings.get('SERVER_URL')
+    soup = BeautifulSoup(dom, 'html.parser')
+
+    for audio_tag in soup.findAll('audio'):
+        audio_source = audio_tag.get('src')
+
+        if audio_source:
+            #audio_path = download_video(audio_source, path)
+            audio_name = audio_source.split('/')[-1][:-4]
+            #audio_tag['src'] = f'{SERVER_URL}{path[path.index("LOs"):]}/{audio_source.split("/")[-1]}'
+
+            sound = AudioSegment.from_file(f'{audio_source}')
+            sound.export('audio.wav', format='wav')
+
+            r = sr.Recognizer()
+
+
+            with sr.AudioFile('audio.wav') as source:
+                audio = r.record(source)
+                try:
+                    text = r.recognize_google(audio, language='es-ES')
+                except Exception:
+                    text = ''
+
+            audio_text = {
+                'text': text
+            }
+
+            with open(f'{audio_name}.json', 'w', encoding='utf-8') as json_file:
+                json.dump(audio_text, json_file)
+            audio_tag['data-text'] = f'{SERVER_URL}{path[path.index("LOs"):]}/{audio_name}.json'
+
+        else:
+            continue
+
     return str(soup)
