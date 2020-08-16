@@ -41,7 +41,9 @@ class LearningObjectResourceItem(object):
         if(clone_result.result == falcon.HTTP_404):
             resp.status = falcon.HTTP_404
         else:
-            hide_links_with_404(clone_result.result)
             resp.status = falcon.HTTP_200
+
+        if (clone_result.status == 'SUCCESS'):
+            hide_links_with_404(clone_result.result)
 
         resp.body = json.dumps(result)
